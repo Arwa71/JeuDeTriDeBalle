@@ -12,6 +12,7 @@ import java.util.Collections;
  */
 public class Jeu {
     private ArrayList<Tube> tubes;
+    private int coupsRestants;
 
     public Jeu(int nbCouleurs, int nbTubesVides) {
         tubes = new ArrayList<>();
@@ -42,6 +43,10 @@ public class Jeu {
         for (int i = 0; i < nbTubesVides; i++) {
             tubes.add(new Tube());
         }
+        
+
+
+       this.coupsRestants = 10;
     }
 
     public boolean deplacer(int from, int to) {
@@ -84,5 +89,20 @@ public class Jeu {
             System.out.println("Tube " + i + ": " + tubes.get(i));
         }
     }
+
+    public int getNombreTubes() {
+    return tubes.size();
+}
+
+public int getCoupsRestants() {
+    return coupsRestants;
+}
+
+// Optionnel : réduire les coups
+public void utiliserUnCoups() {
+    if (coupsRestants > 0) {
+        coupsRestants--;
+    }
+}
     
 }
