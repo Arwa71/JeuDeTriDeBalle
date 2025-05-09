@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : ven. 09 mai 2025 à 00:38
+-- Généré le : ven. 09 mai 2025 à 16:43
 -- Version du serveur : 10.4.32-MariaDB
 -- Version de PHP : 8.0.30
 
@@ -18,19 +18,8 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de données : `ballsort`
+-- Base de données : `ball_sort`
 --
-
--- --------------------------------------------------------
-
---
--- Structure de la table `gamestate`
---
-
-CREATE TABLE `gamestate` (
-  `game_id` int(11) NOT NULL,
-  `state` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -40,18 +29,14 @@ CREATE TABLE `gamestate` (
 
 CREATE TABLE `scores` (
   `score_id` int(11) NOT NULL,
-  `score` int(11) DEFAULT NULL
+  `pseudo` varchar(50) NOT NULL,
+  `coups` int(11) NOT NULL,
+  `date` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Index pour les tables déchargées
 --
-
---
--- Index pour la table `gamestate`
---
-ALTER TABLE `gamestate`
-  ADD PRIMARY KEY (`game_id`);
 
 --
 -- Index pour la table `scores`
@@ -62,12 +47,6 @@ ALTER TABLE `scores`
 --
 -- AUTO_INCREMENT pour les tables déchargées
 --
-
---
--- AUTO_INCREMENT pour la table `gamestate`
---
-ALTER TABLE `gamestate`
-  MODIFY `game_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT pour la table `scores`
