@@ -4,28 +4,29 @@
  */
 package model;
 
-/**
- *
- * @author Surface
- */
+import java.awt.Color;
+
 public class Boule {
-     private String couleur;
+    private Color couleur;
+    private int position; // Position dans le tube
 
-    public Boule(String couleur) {
+    public Boule(Color couleur) {
         this.couleur = couleur;
     }
 
-    public String getCouleur() {
+    public Color getCouleur() {
         return couleur;
     }
 
-    public void setCouleur(String couleur) {
+    public void setCouleur(Color couleur) {
         this.couleur = couleur;
     }
 
-    @Override
-    public String toString() {
-        return couleur;
+    public int getPosition() {
+        return position;
     }
-    
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
 }

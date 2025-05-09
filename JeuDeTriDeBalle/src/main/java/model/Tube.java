@@ -4,65 +4,53 @@
  */
 package model;
 
-import java.util.Stack;
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- *
- * @author Surface
- */
 public class Tube {
-    private Stack<Boule> boules;
-    private final int capacite = 4;
+    private List<Boule> boules;
+    private boolean estVide;
 
     public Tube() {
-        boules = new Stack<>();
+        this.boules = new ArrayList<>();
+        this.estVide = true;
     }
 
-    public boolean estVide() {
-        return boules.isEmpty();
-    }
-
-    public boolean estPlein() {
-        return boules.size() == capacite;
-    }
-
-    public Boule sommet() {
-        if (!estVide()) {
-            return boules.peek();
-        }
-        return null;
-    }
-
-    public boolean peutRecevoir(Boule b) {
-        return estVide() || (!estPlein() && sommet().getCouleur().equals(b.getCouleur()));
-    }
-
-    public boolean ajouterBoule(Boule b) {
-        if (peutRecevoir(b)) {
-            boules.push(b);
+    public boolean ajouterBoule(Boule boule) {
+        if (estVide || (boules.size() > 0 && boule.getCouleur().equals(boules.get(0).getCouleur()))) {
+            boules.add(boule);
+            estVide = false;
             return true;
         }
         return false;
     }
 
     public Boule retirerBoule() {
-        if (!estVide()) {
-            return boules.pop();
+        if (!estVide) {
+            return boules.remove(boules.size() - 1);
         }
         return null;
     }
 
-    public Stack<Boule> getBoules() {
+    public boolean estPlein() {
+        return boules.size() == 10; // Exemple : 4 boules par tube
+    }
+
+    public boolean estTrie() {
+        if (boules.isEmpty()) return true;
+        Color couleur = boules.get(0).getCouleur();
+        for (Boule b : boules) {
+            if (!b.getCouleur().equals(couleur)) return false;
+        }
+        return true;
+    }
+
+    public List<Boule> getBoules() {
         return boules;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("| ");
-        for (int i = boules.size() - 1; i >= 0; i--) {
-            sb.append(boules.get(i).getCouleur()).append(" | ");
-        }
-        return sb.toString();
+    public boolean estVide() {
+        return estVide;
     }
-    
 }

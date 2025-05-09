@@ -1,108 +1,72 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
+
+import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
-/**
- *
- * @author Surface
- */
 public class Jeu {
-    private ArrayList<Tube> tubes;
+    private List<Tube> tubes;
     private int coupsRestants;
+    private boolean victoire;
 
-    public Jeu(int nbCouleurs, int nbTubesVides) {
+    public Jeu(int nombreTubes, int boulesParTube) {
         tubes = new ArrayList<>();
-
-        // Créer les tubes
-        ArrayList<Boule> toutesLesBoules = new ArrayList<>();
-        String[] couleurs = {"Rouge", "Bleu", "Vert", "Jaune", "Orange", "Violet"};
-
-        for (int i = 0; i < nbCouleurs; i++) {
-            for (int j = 0; j < 4; j++) {
-                toutesLesBoules.add(new Boule(couleurs[i]));
-            }
-        }
-
-        Collections.shuffle(toutesLesBoules); // Mélanger les boules
-
-        // Remplir les tubes avec les boules
-        int index = 0;
-        for (int i = 0; i < nbCouleurs; i++) {
-            Tube t = new Tube();
-            for (int j = 0; j < 4; j++) {
-                t.ajouterBoule(toutesLesBoules.get(index++));
-            }
-            tubes.add(t);
-        }
-
-        // Ajouter les tubes vides
-        for (int i = 0; i < nbTubesVides; i++) {
-            tubes.add(new Tube());
-        }
-        
-
-
-       this.coupsRestants = 10;
+        genererTubes(nombreTubes, boulesParTube);
+        coupsRestants = 10; // Exemple de coups restants
+        victoire = false;
     }
 
-    public boolean deplacer(int from, int to) {
-        if (from < 0 || to < 0 || from >= tubes.size() || to >= tubes.size()) return false;
+    private void genererTubes(int nombreTubes, int boulesParTube) {
+        Random rand = new Random();
+        List<Color> couleurs = List.of(Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW);
 
-        Tube source = tubes.get(from);
-        Tube destination = tubes.get(to);
+        for (int i = 0; i < nombreTubes; i++) {
+            Tube tube = new Tube();
+            for (int j = 0; j < boulesParTube; j++) {
+                Color couleur = couleurs.get(rand.nextInt(couleurs.size()));
+                tube.ajouterBoule(new Boule(couleur));
+            }
+            tubes.add(tube);
+        }
+    }
 
-        if (source.estVide()) return false;
-
-        Boule b = source.sommet();
-        if (destination.peutRecevoir(b)) {
-            destination.ajouterBoule(source.retirerBoule());
+    public boolean deplacerBoule(Tube source, Tube destination) {
+        Boule boule = source.retirerBoule();
+        if (destination.ajouterBoule(boule)) {
+            coupsRestants--;
+            verifierVictoire();
             return true;
         }
+        source.ajouterBoule(boule); // Annuler le déplacement invalide
         return false;
     }
 
-    public boolean estGagne() {
-        for (Tube t : tubes) {
-            if (!t.estVide()) {
-                String couleur = null;
-                for (Boule b : t.getBoules()) {
-                    if (couleur == null) couleur = b.getCouleur();
-                    else if (!b.getCouleur().equals(couleur)) return false;
-                }
-                if (t.getBoules().size() < 4) return false;
+    private void verifierVictoire() {
+        for (Tube tube : tubes) {
+            if (!tube.estTrie()) {
+                victoire = false;
+                return;
             }
         }
-        return true;
+        victoire = true;
     }
 
-    public ArrayList<Tube> getTubes() {
+    public List<Tube> getTubes() {
         return tubes;
     }
 
-    public void afficher() {
-        System.out.println("\n--- État des tubes ---");
-        for (int i = 0; i < tubes.size(); i++) {
-            System.out.println("Tube " + i + ": " + tubes.get(i));
-        }
+    public int getCoupsRestants() {
+        return coupsRestants;
     }
 
-    public int getNombreTubes() {
-    return tubes.size();
-}
-
-public int getCoupsRestants() {
-    return coupsRestants;
-}
-
-// Optionnel : réduire les coups
-public void utiliserUnCoups() {
-    if (coupsRestants > 0) {
-        coupsRestants--;
+    public boolean estVictoire() {
+        return victoire;
     }
-}
-    
+
+    public void reinitialiser() {
+        genererTubes(tubes.size(), tubes.get(0).getBoules().size());
+        coupsRestants = 3;
+        victoire = false;
+    }
 }
