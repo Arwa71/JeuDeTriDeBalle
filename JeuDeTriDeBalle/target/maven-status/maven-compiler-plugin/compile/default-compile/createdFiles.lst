@@ -1,7 +1,11 @@
 model\Tube.class
-view\FenetrePrincipale$TubePanel$1.class
 controler\Controleur.class
-view\FenetrePrincipale$TubePanel.class
 model\Jeu.class
+view\FenetrePrincipale$1.class
+view\FenetrePrincipale$ModernTubePanel.class
+view\FenetrePrincipale$ModernButton.class
 model\Boule.class
 view\FenetrePrincipale.class
+view\FenetrePrincipale$ModernButton$1.class
+view\FenetrePrincipale$ModernScrollBarUI.class
+view\FenetrePrincipale$2.class

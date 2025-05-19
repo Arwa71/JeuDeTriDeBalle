@@ -13,8 +13,8 @@ import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 
 public class FenetrePrincipale extends JFrame {
-    private static final int LARGEUR_FENETRE = 1000;
-    private static final int HAUTEUR_FENETRE = 700;
+    private static final int LARGEUR_FENETRE = 600;
+    private static final int HAUTEUR_FENETRE = 400;
 
     // Couleurs du thème moderne
     private static final Color COULEUR_FOND = new Color(13, 17, 23);
@@ -109,10 +109,10 @@ public class FenetrePrincipale extends JFrame {
     private void ajouterZoneJeu() {
         JPanel conteneurJeu = new JPanel(new BorderLayout());
         conteneurJeu.setBackground(COULEUR_FOND);
-        conteneurJeu.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        conteneurJeu.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         panneauPrincipal = new JPanel();
-        panneauPrincipal.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 0));
+        panneauPrincipal.setLayout(new FlowLayout(FlowLayout.CENTER, 8, 0));
         panneauPrincipal.setBackground(COULEUR_FOND);
 
         for (Tube tube : jeu.getTubes()) {
@@ -122,8 +122,14 @@ public class FenetrePrincipale extends JFrame {
                 public void mouseClicked(MouseEvent e) {
                     if (SwingUtilities.isLeftMouseButton(e)) {
                         controleur.selectionnerTube(tube);
+                        if (jeu.estTermine()) {
+                            JOptionPane.showMessageDialog(FenetrePrincipale.this, "Victoire !");
+                        }
                     } else if (SwingUtilities.isRightMouseButton(e)) {
                         controleur.deplacerBillesDeMemeCouleur(tube);
+                        if (jeu.estTermine()) {
+                            JOptionPane.showMessageDialog(FenetrePrincipale.this, "Victoire !");
+                        }
                     }
                 }
 
@@ -172,6 +178,7 @@ public class FenetrePrincipale extends JFrame {
         btnRecommencer.addActionListener(e -> {
             if (controleur != null) {
                 controleur.recommencerPartie();
+                tubeSelectionne = null; // Ajouté : désélectionner tout tube après recommencer
             }
         });
     }
@@ -190,8 +197,14 @@ public class FenetrePrincipale extends JFrame {
                 public void mouseClicked(MouseEvent e) {
                     if (SwingUtilities.isLeftMouseButton(e)) {
                         controleur.selectionnerTube(tube);
+                        if (jeu.estTermine()) {
+                            JOptionPane.showMessageDialog(FenetrePrincipale.this, "Victoire !");
+                        }
                     } else if (SwingUtilities.isRightMouseButton(e)) {
                         controleur.deplacerBillesDeMemeCouleur(tube);
+                        if (jeu.estTermine()) {
+                            JOptionPane.showMessageDialog(FenetrePrincipale.this, "Victoire !");
+                        }
                     }
                 }
 
@@ -219,7 +232,7 @@ public class FenetrePrincipale extends JFrame {
 
         public ModernTubePanel(Tube tube) {
             this.tube = tube;
-            setPreferredSize(new Dimension(100, 600)); // Tubes plus grands
+            setPreferredSize(new Dimension(48, 180)); // tubes plus petits
             setBackground(COULEUR_FOND);
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         }
@@ -240,7 +253,7 @@ public class FenetrePrincipale extends JFrame {
             // Effet d'ombre portée
             if (isHover || isSelected) {
                 g2d.setColor(new Color(0, 0, 0, 50));
-                g2d.fillRoundRect(4, 4, getWidth() - 8, getHeight() - 8, 15, 15);
+                g2d.fillRoundRect(2, 2, getWidth() - 4, getHeight() - 4, 10, 10);
             }
 
             // Contour du tube avec gradient
@@ -249,37 +262,44 @@ public class FenetrePrincipale extends JFrame {
                     0, getHeight(), isSelected ? COULEUR_ACCENT.darker() : COULEUR_SURFACE.darker()
             );
             g2d.setPaint(gradient);
-            g2d.fillRoundRect(10, 20, getWidth() - 20, getHeight() - 40, 12, 12);
+            g2d.fillRoundRect(6, 10, getWidth() - 12, getHeight() - 20, 8, 8);
 
             // Bordure brillante
             if (isSelected) {
                 g2d.setColor(COULEUR_ACCENT);
                 g2d.setStroke(new BasicStroke(2f));
-                g2d.drawRoundRect(10, 20, getWidth() - 20, getHeight() - 40, 12, 12);
+                g2d.drawRoundRect(6, 10, getWidth() - 12, getHeight() - 20, 8, 8);
             } else {
                 g2d.setColor(isHover ? COULEUR_BORDURE.brighter() : COULEUR_BORDURE);
                 g2d.setStroke(new BasicStroke(1f));
-                g2d.drawRoundRect(10, 20, getWidth() - 20, getHeight() - 40, 12, 12);
+                g2d.drawRoundRect(6, 10, getWidth() - 12, getHeight() - 20, 8, 8);
             }
 
-            // Dessiner les boules avec effet 3D
             dessinerBoulesModernes(g2d);
             g2d.dispose();
         }
 
         private void dessinerBoulesModernes(Graphics2D g2d) {
-            int diametre = 60; // Billes plus grandes
-            int espace = 10; // Espace entre les billes plus grand
-            int x = (getWidth() - diametre) / 2;
-            int yStart = getHeight() - 40; // Position de départ ajustée
             java.util.List<Boule> boules = tube.getBoules();
+            int nbBoules = tube.getTailleMax();
+            int espaceTotal = getHeight() - 20 - 10; // 20: bas, 10: haut
+            int diametre, espace;
+            if (nbBoules > 1) {
+                diametre = Math.min(32, (espaceTotal - (nbBoules - 1) * 3) / nbBoules);
+                espace = (espaceTotal - diametre * nbBoules) / (nbBoules - 1);
+            } else {
+                diametre = Math.min(32, espaceTotal);
+                espace = 0;
+            }
+            int x = (getWidth() - diametre) / 2;
+            int yStart = getHeight() - 20 - diametre;
             for (int i = 0; i < boules.size(); i++) {
                 Boule boule = boules.get(i);
                 int y = yStart - (i * (diametre + espace));
 
                 // Ombre de la boule
                 g2d.setColor(new Color(0, 0, 0, 30));
-                g2d.fillOval(x + 2, y + 2, diametre, diametre);
+                g2d.fillOval(x + 1, y + 1, diametre, diametre);
 
                 // Gradient pour effet 3D
                 Color couleurBoule = boule.getCouleur();
@@ -292,7 +312,7 @@ public class FenetrePrincipale extends JFrame {
 
                 // Reflet brillant
                 g2d.setColor(new Color(255, 255, 255, 80));
-                g2d.fillOval(x + 10, y + 10, diametre / 3, diametre / 3);
+                g2d.fillOval(x + diametre / 6, y + diametre / 6, diametre / 3, diametre / 3);
 
                 // Contour subtil
                 g2d.setColor(couleurBoule.darker().darker());
@@ -302,10 +322,10 @@ public class FenetrePrincipale extends JFrame {
         }
 
         private Color getBouleSurLaquelleOnClique(int x, int y) {
-            int diametre = 60; // Billes plus grandes
-            int espace = 10; // Espace entre les billes plus grand
+            int diametre = 32; // Billes plus petites
+            int espace = 3; // Espace entre les billes plus petit
             int xBoule = (getWidth() - diametre) / 2;
-            int yStart = getHeight() - 40; // Position de départ ajustée
+            int yStart = getHeight() - 20; // Position de départ ajustée
             java.util.List<Boule> boules = tube.getBoules();
             for (int i = 0; i < boules.size(); i++) {
                 int yBoule = yStart - (i * (diametre + espace));
@@ -421,7 +441,7 @@ public class FenetrePrincipale extends JFrame {
         System.setProperty("apple.awt.application.name", "Ball Sort Puzzle");
 
         SwingUtilities.invokeLater(() -> {
-            Jeu jeu = new Jeu(5, 6); // Exemple : 5 tubes, 6 billes chacun
+            Jeu jeu = new Jeu(4, 6); // 4 couleurs/tubes remplis, 2 tubes vides ajoutés automatiquement
             FenetrePrincipale fenetre = new FenetrePrincipale(jeu);
             Controleur controleur = new Controleur(jeu, fenetre);
             fenetre.setControleur(controleur);

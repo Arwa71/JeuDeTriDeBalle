@@ -32,8 +32,9 @@ public class Controleur {
             // Deuxième clic : tente de déplacer
             if (jeu.deplacerBoule(tubeSelectionne, tube)) {
                 tubeSelectionne = null; // Réinitialise la sélection
-
                 vue.rechargerTubes(); // Rafraîchit l'interface
+                // Optionnel : vérifier si le jeu est terminé
+                // if (jeu.estTermine()) JOptionPane.showMessageDialog(vue, "Bravo, vous avez gagné !");
             } else {
                 tubeSelectionne = null; // Annule la sélection si échec
             }
@@ -48,10 +49,12 @@ public class Controleur {
             if (!boulesSource.isEmpty()) {
                 Color couleur = boulesSource.get(boulesSource.size() - 1).getCouleur();
 
-                // Déplacer toutes les billes de cette couleur
+                // Déplacer toutes les billes de cette couleur d'un coup
                 if (jeu.deplacerToutesLesBillesDeMemeCouleur(tube, tubeSelectionne, couleur)) {
                     tubeSelectionne = null;
                     vue.rechargerTubes();
+                    // Optionnel : vérifier si le jeu est terminé
+                    // if (jeu.estTermine()) JOptionPane.showMessageDialog(vue, "Bravo, vous avez gagné !");
                 } else {
                     tubeSelectionne = null; // Annule la sélection si échec
                 }
