@@ -11,6 +11,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
+import javax.sound.sampled.*;
 
 public class FenetrePrincipale extends JFrame {
     private static final int LARGEUR_FENETRE = 600;
@@ -121,14 +122,28 @@ public class FenetrePrincipale extends JFrame {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     if (SwingUtilities.isLeftMouseButton(e)) {
-                        controleur.selectionnerTube(tube);
+                        boolean moved = false;
+                        if (controleur != null) {
+                            int before = tube.getBoules().size();
+                            controleur.selectionnerTube(tube);
+                            int after = tube.getBoules().size();
+                            moved = (before != after);
+                        }
+                        if (moved) playSatisfyingMoveSound();
                         if (jeu.estTermine()) {
-                            JOptionPane.showMessageDialog(FenetrePrincipale.this, "Victoire !");
+                            JOptionPane.showMessageDialog(FenetrePrincipale.this, "🎉 VICTOIRE ! 🎉", "Victoire", JOptionPane.INFORMATION_MESSAGE);
                         }
                     } else if (SwingUtilities.isRightMouseButton(e)) {
-                        controleur.deplacerBillesDeMemeCouleur(tube);
+                        boolean moved = false;
+                        if (controleur != null) {
+                            int before = tube.getBoules().size();
+                            controleur.deplacerBillesDeMemeCouleur(tube);
+                            int after = tube.getBoules().size();
+                            moved = (before != after);
+                        }
+                        if (moved) playSatisfyingMoveSound();
                         if (jeu.estTermine()) {
-                            JOptionPane.showMessageDialog(FenetrePrincipale.this, "Victoire !");
+                            JOptionPane.showMessageDialog(FenetrePrincipale.this, "🎉 VICTOIRE ! 🎉", "Victoire", JOptionPane.INFORMATION_MESSAGE);
                         }
                     }
                 }
@@ -196,14 +211,28 @@ public class FenetrePrincipale extends JFrame {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     if (SwingUtilities.isLeftMouseButton(e)) {
-                        controleur.selectionnerTube(tube);
+                        boolean moved = false;
+                        if (controleur != null) {
+                            int before = tube.getBoules().size();
+                            controleur.selectionnerTube(tube);
+                            int after = tube.getBoules().size();
+                            moved = (before != after);
+                        }
+                        if (moved) playSatisfyingMoveSound();
                         if (jeu.estTermine()) {
-                            JOptionPane.showMessageDialog(FenetrePrincipale.this, "Victoire !");
+                            JOptionPane.showMessageDialog(FenetrePrincipale.this, "🎉 VICTOIRE ! 🎉", "Victoire", JOptionPane.INFORMATION_MESSAGE);
                         }
                     } else if (SwingUtilities.isRightMouseButton(e)) {
-                        controleur.deplacerBillesDeMemeCouleur(tube);
+                        boolean moved = false;
+                        if (controleur != null) {
+                            int before = tube.getBoules().size();
+                            controleur.deplacerBillesDeMemeCouleur(tube);
+                            int after = tube.getBoules().size();
+                            moved = (before != after);
+                        }
+                        if (moved) playSatisfyingMoveSound();
                         if (jeu.estTermine()) {
-                            JOptionPane.showMessageDialog(FenetrePrincipale.this, "Victoire !");
+                            JOptionPane.showMessageDialog(FenetrePrincipale.this, "🎉 VICTOIRE ! 🎉", "Victoire", JOptionPane.INFORMATION_MESSAGE);
                         }
                     }
                 }
@@ -222,6 +251,34 @@ public class FenetrePrincipale extends JFrame {
         }
         panneauPrincipal.revalidate();
         panneauPrincipal.repaint();
+    }
+
+    // Effet sonore pour deplacement
+    private void playSatisfyingMoveSound() {
+        try {
+            float sampleRate = 44100;
+            int ms = 120;
+            int len = (int) (sampleRate * ms / 1000);
+            byte[] buf = new byte[len];
+            double freq = 1047; // C6, glassy
+            double overtone1 = 1568; // G6
+            double overtone2 = 2093; // C7
+            for (int i = 0; i < len; i++) {
+                double t = i / sampleRate;
+                double env = Math.exp(-3 * t); // envelope for creamy effect
+                double val = Math.sin(2 * Math.PI * freq * t)
+                           + 0.5 * Math.sin(2 * Math.PI * overtone1 * t)
+                           + 0.3 * Math.sin(2 * Math.PI * overtone2 * t);
+                buf[i] = (byte) (env * val * 127);
+            }
+            AudioFormat af = new AudioFormat(sampleRate, 8, 1, true, false);
+            Clip clip = AudioSystem.getClip();
+            clip.open(af, buf, 0, buf.length);
+            clip.start();
+        } catch (Exception ex) {
+            // fallback
+            Toolkit.getDefaultToolkit().beep();
+        }
     }
 
     // Classe pour tube panel moderne

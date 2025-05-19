@@ -54,19 +54,43 @@ public class Jeu {
 
     public boolean deplacerBoule(Tube source, Tube dest) {
         if (source.estVide() || dest.estPlein() || source == dest) {
-            return false; // Impossible de déplacer si source vide, dest plein ou même tube
+            return false;
         }
         Boule boule = source.getDerniereBoule();
+        Color couleur = boule.getCouleur();
+
+        // Compter combien de boules consécutives du haut sont de la même couleur
+        int count = 0;
+        List<Boule> boulesSource = source.getBoules();
+        for (int i = boulesSource.size() - 1; i >= 0; i--) {
+            if (boulesSource.get(i).getCouleur().equals(couleur)) {
+                count++;
+            } else {
+                break;
+            }
+        }
+
         // Vérifier la couleur du dessus du tube destination
         if (!dest.estVide()) {
             Boule topDest = dest.getDerniereBoule();
-            if (!topDest.getCouleur().equals(boule.getCouleur())) {
+            if (!topDest.getCouleur().equals(couleur)) {
                 return false;
             }
         }
-        // Déplacer la boule
-        boule = source.retirerDerniereBoule();
-        dest.ajouterBoule(boule);
+
+        // Calculer combien de boules peuvent être déplacées
+        int espace = dest.getTailleMax() - dest.getBoules().size();
+        int aDeplacer = Math.min(count, espace);
+        if (aDeplacer == 0) return false;
+
+        // Déplacer les boules (en conservant l'ordre)
+        List<Boule> aBouger = new ArrayList<>();
+        for (int i = 0; i < aDeplacer; i++) {
+            aBouger.add(0, source.retirerDerniereBoule());
+        }
+        for (Boule b : aBouger) {
+            dest.ajouterBoule(b);
+        }
         return true;
     }
 
