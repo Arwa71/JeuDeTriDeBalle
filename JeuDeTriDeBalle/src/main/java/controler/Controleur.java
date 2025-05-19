@@ -1,15 +1,24 @@
 package controler;
 
+import model.Boule;
 import model.Jeu;
 import model.Tube;
 import view.FenetrePrincipale;
 
-import java.sql.*;
+import java.awt.*;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import model.Jeu;
+import model.Tube;
+import view.FenetrePrincipale;
 
 public class Controleur {
     private Jeu jeu;
     private FenetrePrincipale vue;
+
+    private Tube tubeSelectionne = null;
 
     public Controleur(Jeu jeu, FenetrePrincipale vue) {
         this.jeu = jeu;
@@ -17,45 +26,41 @@ public class Controleur {
     }
 
     public void selectionnerTube(Tube tube) {
-        if (jeu.estVictoire()) return; // Ne rien faire si la partie est gagnée
+        if (tubeSelectionne == null) {
+            tubeSelectionne = tube; // Premier clic : sélectionne la source
+        } else {
+            // Deuxième clic : tente de déplacer
+            if (jeu.deplacerBoule(tubeSelectionne, tube)) {
+                tubeSelectionne = null; // Réinitialise la sélection
 
-        // Logique de déplacement (exemple simple)
-        // À améliorer avec une sélection de deux tubes consécutifs
-        Tube tubeSource = tube;
-        Tube tubeDestination = rechercherTubeVide();
-
-        if (tubeDestination != null) {
-            jeu.deplacerBoule(tubeSource, tubeDestination);
-            vue.mettreAJourCoups(jeu.getCoupsRestants());
-            vue.repaint();
+                vue.rechargerTubes(); // Rafraîchit l'interface
+            } else {
+                tubeSelectionne = null; // Annule la sélection si échec
+            }
         }
     }
 
-    private Tube rechercherTubeVide() {
-        for (Tube t : jeu.getTubes()) {
-            if (t.estVide()) return t;
-        }
-        return null;
-    }
+    public void deplacerBillesDeMemeCouleur(Tube tube) {
+        if (tubeSelectionne == null) {
+            tubeSelectionne = tube; // Premier clic : sélectionne la source
+        } else {
+            List<Boule> boulesSource = tube.getBoules();
+            if (!boulesSource.isEmpty()) {
+                Color couleur = boulesSource.get(boulesSource.size() - 1).getCouleur();
 
-    public void sauvegarderScore(String pseudo, int coups) {
-        try (Connection conn = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/ball_sort", 
-                "root", 
-                "")) {
-            String sql = "INSERT INTO scores (pseudo, coups) VALUES (?, ?)";
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, pseudo);
-            stmt.setInt(2, coups);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
+                // Déplacer toutes les billes de cette couleur
+                if (jeu.deplacerToutesLesBillesDeMemeCouleur(tube, tubeSelectionne, couleur)) {
+                    tubeSelectionne = null;
+                    vue.rechargerTubes();
+                } else {
+                    tubeSelectionne = null; // Annule la sélection si échec
+                }
+            }
         }
     }
 
     public void recommencerPartie() {
         jeu.reinitialiser();
-        vue.mettreAJourCoups(jeu.getCoupsRestants());
-        vue.repaint();
+        vue.rechargerTubes();
     }
 }

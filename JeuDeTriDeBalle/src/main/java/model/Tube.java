@@ -8,49 +8,69 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
+
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
 public class Tube {
-    private List<Boule> boules;
-    private boolean estVide;
+    private List<Boule> billes;
 
     public Tube() {
-        this.boules = new ArrayList<>();
-        this.estVide = true;
+        this.billes = new ArrayList<>();
     }
 
-    public boolean ajouterBoule(Boule boule) {
-        if (estVide || (boules.size() > 0 && boule.getCouleur().equals(boules.get(0).getCouleur()))) {
-            boules.add(boule);
-            estVide = false;
-            return true;
+    // Ajoute une bille sans vérifier la capacité
+    public void ajouterBoule(Boule boule) {
+        billes.add(boule);
+    }
+
+    // Retire la dernière bille du tube
+    public Boule retirerDerniereBoule() {
+        if (billes.isEmpty()) {
+            return null;
         }
-        return false;
+        return billes.remove(billes.size() - 1);
     }
 
-    public Boule retirerBoule() {
-        if (!estVide) {
-            return boules.remove(boules.size() - 1);
-        }
-        return null;
-    }
-
-    public boolean estPlein() {
-        return boules.size() == 10; // Exemple : 4 boules par tube
-    }
-
-    public boolean estTrie() {
-        if (boules.isEmpty()) return true;
-        Color couleur = boules.get(0).getCouleur();
-        for (Boule b : boules) {
-            if (!b.getCouleur().equals(couleur)) return false;
-        }
-        return true;
-    }
-
+    // Retourne toutes les billes du tube
     public List<Boule> getBoules() {
-        return boules;
+        return billes;
     }
 
+    // Vérifie si le tube est vide
     public boolean estVide() {
-        return estVide;
+        return billes.isEmpty();
+    }
+
+    // Méthode ajoutée pour déplacer toutes les billes de même couleur
+    public boolean deplacerToutesLesBillesDeMemeCouleur(Tube dest, Color couleur) {
+        List<Boule> billesADeplacer = new ArrayList<>();
+
+        // Collecter toutes les billes de la couleur spécifiée dans le tube source
+        for (int i = billes.size() - 1; i >= 0; i--) {
+            Boule boule = billes.get(i);
+            if (boule.getCouleur().equals(couleur)) {
+                billesADeplacer.add(boule);
+            } else {
+                break; // Arrête dès qu'on trouve une bille d'une autre couleur
+            }
+        }
+
+        // Retirer les billes du tube source
+        billes.removeAll(billesADeplacer);
+
+        // Ajouter les billes au tube destination
+        dest.getBoules().addAll(billesADeplacer);
+
+        return !billesADeplacer.isEmpty(); // Vrai si au moins une bille a été déplacée
+    }
+
+    public int getTailleMax() {
+        return  billes.size() ;
     }
 }

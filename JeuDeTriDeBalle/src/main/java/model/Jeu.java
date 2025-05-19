@@ -2,54 +2,57 @@ package model;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 public class Jeu {
     private List<Tube> tubes;
     private int coupsRestants;
-    private boolean victoire;
 
     public Jeu(int nombreTubes, int boulesParTube) {
         tubes = new ArrayList<>();
         genererTubes(nombreTubes, boulesParTube);
-        coupsRestants = 10; // Exemple de coups restants
-        victoire = false;
+        coupsRestants = 100; // Ou une autre valeur
     }
 
     private void genererTubes(int nombreTubes, int boulesParTube) {
         Random rand = new Random();
         List<Color> couleurs = List.of(Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW);
 
+        List<Boule> toutesLesBilles = new ArrayList<>();
+        for (int i = 0; i < nombreTubes * boulesParTube; i++) {
+            Boule boule = new Boule(couleurs.get(rand.nextInt(couleurs.size())));
+            toutesLesBilles.add(boule);
+        }
+        Collections.shuffle(toutesLesBilles);
+
         for (int i = 0; i < nombreTubes; i++) {
             Tube tube = new Tube();
             for (int j = 0; j < boulesParTube; j++) {
-                Color couleur = couleurs.get(rand.nextInt(couleurs.size()));
-                tube.ajouterBoule(new Boule(couleur));
+                tube.ajouterBoule(toutesLesBilles.remove(0));
             }
             tubes.add(tube);
         }
     }
 
-    public boolean deplacerBoule(Tube source, Tube destination) {
-        Boule boule = source.retirerBoule();
-        if (destination.ajouterBoule(boule)) {
-            coupsRestants--;
-            verifierVictoire();
-            return true;
+    public boolean deplacerBoule(Tube source, Tube dest) {
+        if (source.estVide()) {
+            return false; // Impossible de déplacer si source vide
         }
-        source.ajouterBoule(boule); // Annuler le déplacement invalide
-        return false;
+        Boule boule = source.retirerDerniereBoule();
+        dest.ajouterBoule(boule);
+        return true;
     }
 
-    private void verifierVictoire() {
-        for (Tube tube : tubes) {
-            if (!tube.estTrie()) {
-                victoire = false;
-                return;
-            }
-        }
-        victoire = true;
+    public boolean deplacerToutesLesBillesDeMemeCouleur(Tube source, Tube dest, Color couleur) {
+        return source.deplacerToutesLesBillesDeMemeCouleur(dest, couleur);
+    }
+
+    public void reinitialiser() {
+        tubes.clear();
+        genererTubes(tubes.size(), 6); // Génère 6 billes par tube
+        coupsRestants = 100; // Réinitialise les coups restants
     }
 
     public List<Tube> getTubes() {
@@ -60,13 +63,7 @@ public class Jeu {
         return coupsRestants;
     }
 
-    public boolean estVictoire() {
-        return victoire;
-    }
-
-    public void reinitialiser() {
-        genererTubes(tubes.size(), tubes.get(0).getBoules().size());
-        coupsRestants = 3;
-        victoire = false;
+    public void decrementerCoups() {
+        coupsRestants--;
     }
 }
