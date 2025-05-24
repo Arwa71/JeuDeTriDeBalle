@@ -117,7 +117,7 @@ public class FenetrePrincipale extends JFrame {
         ));
 
         // Titre avec effet de dégradé
-        lblTitre = new JLabel("✨ Ball Sort Puzzle ✨") {
+        lblTitre = new JLabel(" Ball Sort Puzzle ") {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g.create();
@@ -206,7 +206,7 @@ public class FenetrePrincipale extends JFrame {
                 @Override
                 public void mouseEntered(MouseEvent e) {
                     panel.setHover(true);
-                    lblStatut.setText("Clic gauche: déplacer une boule | Clic droit: toutes les boules de même couleur");
+                    lblStatut.setText("Cliquer sur les boules pour les déplacer!");
                 }
 
                 @Override
@@ -239,7 +239,7 @@ public class FenetrePrincipale extends JFrame {
                 BorderFactory.createEmptyBorder(25, 40, 25, 40)
         ));
 
-        btnRecommencer = new ModernButton("🔄 Nouvelle Partie");
+        btnRecommencer = new ModernButton(" Nouvelle Partie");
         btnRecommencer.setPreferredSize(new Dimension(180, 45));
         panneauBas.add(btnRecommencer);
 
@@ -315,7 +315,7 @@ public class FenetrePrincipale extends JFrame {
                 @Override
                 public void mouseEntered(MouseEvent e) {
                     panel.setHover(true);
-                    lblStatut.setText("Clic gauche: déplacer une boule | Clic droit: toutes les boules de même couleur");
+                    lblStatut.setText("Cliquer sur les boules pour les déplacer!");
                 }
 
                 @Override
@@ -377,7 +377,7 @@ public class FenetrePrincipale extends JFrame {
             panneauDialogue.setBackground(COULEUR_SURFACE);
 
             // Titre de victoire avec emoji et style
-            JLabel lblVictoire = new JLabel("🎉 VICTOIRE ! 🎉") {
+            JLabel lblVictoire = new JLabel(" VICTOIRE ! ") {
                 @Override
                 protected void paintComponent(Graphics g) {
                     Graphics2D g2d = (Graphics2D) g.create();
@@ -411,7 +411,7 @@ public class FenetrePrincipale extends JFrame {
             JPanel panneauBoutons = new JPanel(new FlowLayout());
             panneauBoutons.setOpaque(false);
 
-            ModernButton btnNouvellePartie = new ModernButton("🚀 Nouvelle Partie");
+            ModernButton btnNouvellePartie = new ModernButton(" Nouvelle Partie");
             btnNouvellePartie.setPreferredSize(new Dimension(150, 40));
             btnNouvellePartie.addActionListener(e -> {
                 dialogueVictoire.dispose();
@@ -421,7 +421,7 @@ public class FenetrePrincipale extends JFrame {
                 }
             });
 
-            ModernButton btnFermer = new ModernButton("✨ Fermer");
+            ModernButton btnFermer = new ModernButton(" Fermer");
             btnFermer.setPreferredSize(new Dimension(100, 40));
             btnFermer.addActionListener(e -> dialogueVictoire.dispose());
 
