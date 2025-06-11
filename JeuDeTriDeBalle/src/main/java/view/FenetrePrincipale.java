@@ -11,6 +11,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
+import java.util.List;
 import java.util.Random;
 import javax.sound.sampled.*;
 
@@ -32,20 +33,43 @@ public class FenetrePrincipale extends JFrame {
     private ModernButton btnRecommencer;
     private JLabel lblTitre;
     private JLabel lblStatut;
+    private JLabel lblBestScore;
+    private JPanel leaderboardPanel;
     private Jeu jeu;
     private Controleur controleur;
     private Tube tubeSelectionne;
     private Timer pulseTimer;
     private float pulseAlpha = 0.0f;
+    private String pseudoUtilisateur = null;
+    private JLabel lblUser; // Add this field
 
     public FenetrePrincipale(Jeu jeu) {
         this.jeu = jeu;
         this.controleur = null;
         this.tubeSelectionne = null;
+        demanderPseudo(); // Ask for pseudo at startup
         initialiserFenetre();
         ajouterComposants();
         configurerEvenements();
         demarrerAnimations();
+    }
+
+    private void demanderPseudo() {
+        while (pseudoUtilisateur == null || pseudoUtilisateur.trim().isEmpty()) {
+            pseudoUtilisateur = JOptionPane.showInputDialog(
+                this,
+                "Entrez votre pseudo pour enregistrer votre score :",
+                "Pseudo requis",
+                JOptionPane.QUESTION_MESSAGE
+            );
+            if (pseudoUtilisateur == null) {
+                System.exit(0);
+            }
+            pseudoUtilisateur = pseudoUtilisateur.trim();
+        }
+        if (lblUser != null) {
+            lblUser.setText("Joueur : " + pseudoUtilisateur);
+        }
     }
 
     public void setControleur(Controleur controleur) {
@@ -116,14 +140,11 @@ public class FenetrePrincipale extends JFrame {
                 BorderFactory.createEmptyBorder(25, 40, 25, 40)
         ));
 
-        // Titre avec effet de dégradé
-        lblTitre = new JLabel("✨ Ball Sort Puzzle ✨") {
+        lblTitre = new JLabel("Ball Sort Puzzle") {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2d = (Graphics2D) g.create();
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-                // Dégradé pour le texte
                 GradientPaint gradient = new GradientPaint(
                         0, 0, COULEUR_ACCENT.brighter(),
                         getWidth(), 0, COULEUR_GOLD
@@ -134,26 +155,79 @@ public class FenetrePrincipale extends JFrame {
                 int x = (getWidth() - fm.stringWidth(getText())) / 2;
                 int y = (getHeight() + fm.getAscent()) / 2;
                 g2d.drawString(getText(), x, y);
-
                 g2d.dispose();
             }
         };
         lblTitre.setFont(new Font("Segoe UI", Font.BOLD, 32));
         lblTitre.setHorizontalAlignment(SwingConstants.CENTER);
 
-        // Statut du jeu
         lblStatut = new JLabel("Prêt à jouer !");
         lblStatut.setFont(new Font("Segoe UI", Font.ITALIC, 14));
         lblStatut.setForeground(COULEUR_TEXTE.darker());
         lblStatut.setHorizontalAlignment(SwingConstants.CENTER);
+
+        lblBestScore = new JLabel();
+        lblBestScore.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblBestScore.setForeground(COULEUR_GOLD);
+        lblBestScore.setHorizontalAlignment(SwingConstants.CENTER);
+
+        leaderboardPanel = new JPanel();
+        leaderboardPanel.setBackground(COULEUR_SURFACE);
+        leaderboardPanel.setLayout(new BoxLayout(leaderboardPanel, BoxLayout.Y_AXIS));
 
         JPanel conteneurTitre = new JPanel(new BorderLayout());
         conteneurTitre.setBackground(COULEUR_SURFACE);
         conteneurTitre.add(lblTitre, BorderLayout.CENTER);
         conteneurTitre.add(lblStatut, BorderLayout.SOUTH);
 
+        JPanel infoPanel = new JPanel();
+        infoPanel.setBackground(COULEUR_SURFACE);
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        infoPanel.add(lblBestScore);
+        infoPanel.add(leaderboardPanel);
+
+        lblUser = new JLabel("Joueur : " + pseudoUtilisateur);
+        lblUser.setFont(new Font("Segoe UI", Font.ITALIC, 13));
+        lblUser.setForeground(COULEUR_TEXTE);
+        infoPanel.add(lblUser);
+
         panneauEnTete.add(conteneurTitre, BorderLayout.CENTER);
+        panneauEnTete.add(infoPanel, BorderLayout.EAST);
+
         add(panneauEnTete, BorderLayout.NORTH);
+
+        // Load scores from DB
+        rafraichirScores();
+    }
+
+    // Call this method whenever you want to refresh the best score/leaderboard
+    private void rafraichirScores() {
+        try {
+            List<String[]> topScores = util.ScoreDAO.getTopScores(10);
+            if (!topScores.isEmpty()) {
+                String[] best = topScores.get(0);
+                lblBestScore.setText("Meilleur score : " + best[0] + " coups par " + best[1] + " (" + best[2] + ")");
+            } else {
+                lblBestScore.setText("Aucun score enregistré.");
+            }
+            // Leaderboard (top 10)
+            leaderboardPanel.removeAll();
+            JLabel lb = new JLabel("Top 10 :");
+            lb.setFont(new Font("Segoe UI", Font.BOLD, 13));
+            lb.setForeground(COULEUR_ACCENT);
+            leaderboardPanel.add(lb);
+            for (int i = 0; i < topScores.size(); i++) {
+                String[] s = topScores.get(i);
+                JLabel l = new JLabel((i+1) + ". " + s[1] + " - " + s[0] + " coups (" + s[2] + ")");
+                l.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+                l.setForeground(COULEUR_TEXTE);
+                leaderboardPanel.add(l);
+            }
+            leaderboardPanel.revalidate();
+            leaderboardPanel.repaint();
+        } catch (Exception e) {
+            lblBestScore.setText("Erreur chargement scores.");
+        }
     }
 
     private void ajouterZoneJeu() {
@@ -170,13 +244,14 @@ public class FenetrePrincipale extends JFrame {
             panel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
+                    boolean moved = false;
                     if (SwingUtilities.isLeftMouseButton(e)) {
-                        boolean moved = false;
                         if (controleur != null) {
                             int before = tube.getBoules().size();
                             controleur.selectionnerTube(tube);
                             int after = tube.getBoules().size();
                             moved = (before != after);
+                            if (moved) jeu.decrementerCoups(); // Decrement moves here
                         }
                         if (moved) {
                             playSatisfyingMoveSound();
@@ -186,12 +261,12 @@ public class FenetrePrincipale extends JFrame {
                             afficherVictoirePremium();
                         }
                     } else if (SwingUtilities.isRightMouseButton(e)) {
-                        boolean moved = false;
                         if (controleur != null) {
                             int before = tube.getBoules().size();
                             controleur.deplacerBillesDeMemeCouleur(tube);
                             int after = tube.getBoules().size();
                             moved = (before != after);
+                            if (moved) jeu.decrementerCoups(); // Decrement moves here
                         }
                         if (moved) {
                             playPowerMoveSound();
@@ -206,7 +281,7 @@ public class FenetrePrincipale extends JFrame {
                 @Override
                 public void mouseEntered(MouseEvent e) {
                     panel.setHover(true);
-                    lblStatut.setText("Clic gauche: déplacer une boule | Clic droit: toutes les boules de même couleur");
+                    // lblStatut.setText("Clic gauche: déplacer une boule | Clic droit: toutes les boules de même couleur");
                 }
 
                 @Override
@@ -239,7 +314,7 @@ public class FenetrePrincipale extends JFrame {
                 BorderFactory.createEmptyBorder(25, 40, 25, 40)
         ));
 
-        btnRecommencer = new ModernButton("🔄 Nouvelle Partie");
+        btnRecommencer = new ModernButton("Nouvelle Partie");
         btnRecommencer.setPreferredSize(new Dimension(180, 45));
         panneauBas.add(btnRecommencer);
 
@@ -279,13 +354,14 @@ public class FenetrePrincipale extends JFrame {
             panel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
+                    boolean moved = false;
                     if (SwingUtilities.isLeftMouseButton(e)) {
-                        boolean moved = false;
                         if (controleur != null) {
                             int before = tube.getBoules().size();
                             controleur.selectionnerTube(tube);
                             int after = tube.getBoules().size();
                             moved = (before != after);
+                            if (moved) jeu.decrementerCoups(); // Decrement moves here
                         }
                         if (moved) {
                             playSatisfyingMoveSound();
@@ -295,12 +371,12 @@ public class FenetrePrincipale extends JFrame {
                             afficherVictoirePremium();
                         }
                     } else if (SwingUtilities.isRightMouseButton(e)) {
-                        boolean moved = false;
                         if (controleur != null) {
                             int before = tube.getBoules().size();
                             controleur.deplacerBillesDeMemeCouleur(tube);
                             int after = tube.getBoules().size();
                             moved = (before != after);
+                            if (moved) jeu.decrementerCoups(); // Decrement moves here
                         }
                         if (moved) {
                             playPowerMoveSound();
@@ -315,7 +391,7 @@ public class FenetrePrincipale extends JFrame {
                 @Override
                 public void mouseEntered(MouseEvent e) {
                     panel.setHover(true);
-                    lblStatut.setText("Clic gauche: déplacer une boule | Clic droit: toutes les boules de même couleur");
+                    // lblStatut.setText("Clic gauche: déplacer une boule | Clic droit: toutes les boules de même couleur");
                 }
 
                 @Override
@@ -334,6 +410,12 @@ public class FenetrePrincipale extends JFrame {
     private void afficherVictoirePremium() {
         SwingUtilities.invokeLater(() -> {
             playVictorySound();
+            int coups = calculerCoupsUtilises();
+            try {
+                util.ScoreDAO.saveScore(pseudoUtilisateur, coups);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Erreur lors de l'enregistrement du score : " + ex.getMessage(), "Erreur", JOptionPane.ERROR_MESSAGE);
+            }
 
             // Dialogue personnalisé premium
             JDialog dialogueVictoire = new JDialog(this, "Victoire !", true);
@@ -376,8 +458,8 @@ public class FenetrePrincipale extends JFrame {
             };
             panneauDialogue.setBackground(COULEUR_SURFACE);
 
-            // Titre de victoire avec emoji et style
-            JLabel lblVictoire = new JLabel("🎉 VICTOIRE ! 🎉") {
+            // Titre de victoire sans emoji
+            JLabel lblVictoire = new JLabel("VICTOIRE !") {
                 @Override
                 protected void paintComponent(Graphics g) {
                     Graphics2D g2d = (Graphics2D) g.create();
@@ -401,29 +483,34 @@ public class FenetrePrincipale extends JFrame {
             lblVictoire.setFont(new Font("Segoe UI", Font.BOLD, 36));
             lblVictoire.setHorizontalAlignment(SwingConstants.CENTER);
 
-            // Message de félicitations
-            JLabel lblMessage = new JLabel("<html><center>Félicitations !<br>Vous avez brillamment résolu le puzzle !<br><br>🌟 Performance exceptionnelle ! 🌟</center></html>");
+            // Message de félicitations sans emoji
+            JLabel lblMessage = new JLabel("<html><center>Félicitations !<br>Vous avez brillamment résolu le puzzle !<br><br>Performance exceptionnelle !</center></html>");
             lblMessage.setFont(new Font("Segoe UI", Font.PLAIN, 16));
             lblMessage.setForeground(COULEUR_TEXTE);
             lblMessage.setHorizontalAlignment(SwingConstants.CENTER);
 
-            // Boutons premium
+            // Boutons premium sans emoji
             JPanel panneauBoutons = new JPanel(new FlowLayout());
             panneauBoutons.setOpaque(false);
 
-            ModernButton btnNouvellePartie = new ModernButton("🚀 Nouvelle Partie");
+            ModernButton btnNouvellePartie = new ModernButton("Nouvelle Partie");
             btnNouvellePartie.setPreferredSize(new Dimension(150, 40));
             btnNouvellePartie.addActionListener(e -> {
                 dialogueVictoire.dispose();
+                demanderPseudo(); // Ask for pseudo again for new game
                 if (controleur != null) {
                     controleur.recommencerPartie();
                     tubeSelectionne = null;
                 }
+                rafraichirScores();
             });
 
-            ModernButton btnFermer = new ModernButton("✨ Fermer");
+            ModernButton btnFermer = new ModernButton("Fermer");
             btnFermer.setPreferredSize(new Dimension(100, 40));
-            btnFermer.addActionListener(e -> dialogueVictoire.dispose());
+            btnFermer.addActionListener(e -> {
+                dialogueVictoire.dispose();
+                rafraichirScores();
+            });
 
             panneauBoutons.add(btnNouvellePartie);
             panneauBoutons.add(btnFermer);
@@ -450,6 +537,14 @@ public class FenetrePrincipale extends JFrame {
 
             dialogueVictoire.setVisible(true);
         });
+    }
+
+    // Helper to calculate the number of moves (coups) used
+    private int calculerCoupsUtilises() {
+        // If you have a coups counter in Jeu, use it here.
+        // Otherwise, you can implement your own logic.
+        // For now, let's assume 100 - jeu.getCoupsRestants()
+        return 100 - jeu.getCoupsRestants();
     }
 
     // Sons premium
