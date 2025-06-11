@@ -41,13 +41,13 @@ public class FenetrePrincipale extends JFrame {
     private Timer pulseTimer;
     private float pulseAlpha = 0.0f;
     private String pseudoUtilisateur = null;
-    private JLabel lblUser; // Add this field
+    private JLabel lblUser;
 
     public FenetrePrincipale(Jeu jeu) {
         this.jeu = jeu;
         this.controleur = null;
         this.tubeSelectionne = null;
-        demanderPseudo(); // Ask for pseudo at startup
+        demanderPseudo();
         initialiserFenetre();
         ajouterComposants();
         configurerEvenements();
@@ -84,7 +84,6 @@ public class FenetrePrincipale extends JFrame {
         setLocationRelativeTo(null);
         getContentPane().setBackground(COULEUR_FOND);
 
-        // Icône premium
         try {
             setIconImage(createPremiumIcon());
         } catch (Exception e) {
@@ -98,22 +97,18 @@ public class FenetrePrincipale extends JFrame {
         Graphics2D g2d = icon.createGraphics();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Gradient de fond
         GradientPaint gradient = new GradientPaint(0, 0, COULEUR_ACCENT, size, size, COULEUR_ACCENT.darker());
         g2d.setPaint(gradient);
         g2d.fillRoundRect(4, 4, size - 8, size - 8, 12, 12);
 
-        // Reflets brillants
         g2d.setColor(new Color(255, 255, 255, 60));
         g2d.fillRoundRect(6, 6, size - 12, (size - 12) / 2, 10, 10);
 
-        // Symboles des tubes
         g2d.setColor(Color.WHITE);
         g2d.setStroke(new BasicStroke(2.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         g2d.drawRoundRect(12, 16, 8, 20, 3, 3);
         g2d.drawRoundRect(28, 12, 8, 24, 3, 3);
 
-        // Boules colorées
         g2d.setColor(COULEUR_GOLD);
         g2d.fillOval(14, 30, 4, 4);
         g2d.setColor(COULEUR_SUCCESS);
@@ -124,11 +119,8 @@ public class FenetrePrincipale extends JFrame {
     }
 
     private void ajouterComposants() {
-        // En-tête premium
         ajouterEnTetePremium();
-        // Zone de jeu principale
         ajouterZoneJeu();
-        // Panneau de contrôles en bas
         ajouterPanneauControles();
     }
 
@@ -251,7 +243,7 @@ public class FenetrePrincipale extends JFrame {
                             controleur.selectionnerTube(tube);
                             int after = tube.getBoules().size();
                             moved = (before != after);
-                            if (moved) jeu.decrementerCoups(); // Decrement moves here
+                            if (moved) jeu.decrementerCoups();
                         }
                         if (moved) {
                             playSatisfyingMoveSound();
@@ -266,7 +258,7 @@ public class FenetrePrincipale extends JFrame {
                             controleur.deplacerBillesDeMemeCouleur(tube);
                             int after = tube.getBoules().size();
                             moved = (before != after);
-                            if (moved) jeu.decrementerCoups(); // Decrement moves here
+                            if (moved) jeu.decrementerCoups();
                         }
                         if (moved) {
                             playPowerMoveSound();
@@ -277,13 +269,10 @@ public class FenetrePrincipale extends JFrame {
                         }
                     }
                 }
-
                 @Override
                 public void mouseEntered(MouseEvent e) {
                     panel.setHover(true);
-                    // lblStatut.setText("Clic gauche: déplacer une boule | Clic droit: toutes les boules de même couleur");
                 }
-
                 @Override
                 public void mouseExited(MouseEvent e) {
                     panel.setHover(false);
@@ -333,7 +322,6 @@ public class FenetrePrincipale extends JFrame {
     }
 
     private void demarrerAnimations() {
-        // Animation de pulsation subtile pour l'accent
         pulseTimer = new Timer(50, e -> {
             pulseAlpha += 0.05f;
             if (pulseAlpha > 1.0f) pulseAlpha = 0.0f;
@@ -361,7 +349,7 @@ public class FenetrePrincipale extends JFrame {
                             controleur.selectionnerTube(tube);
                             int after = tube.getBoules().size();
                             moved = (before != after);
-                            if (moved) jeu.decrementerCoups(); // Decrement moves here
+                            if (moved) jeu.decrementerCoups();
                         }
                         if (moved) {
                             playSatisfyingMoveSound();
@@ -376,7 +364,7 @@ public class FenetrePrincipale extends JFrame {
                             controleur.deplacerBillesDeMemeCouleur(tube);
                             int after = tube.getBoules().size();
                             moved = (before != after);
-                            if (moved) jeu.decrementerCoups(); // Decrement moves here
+                            if (moved) jeu.decrementerCoups();
                         }
                         if (moved) {
                             playPowerMoveSound();
@@ -387,13 +375,10 @@ public class FenetrePrincipale extends JFrame {
                         }
                     }
                 }
-
                 @Override
                 public void mouseEntered(MouseEvent e) {
                     panel.setHover(true);
-                    // lblStatut.setText("Clic gauche: déplacer une boule | Clic droit: toutes les boules de même couleur");
                 }
-
                 @Override
                 public void mouseExited(MouseEvent e) {
                     panel.setHover(false);
@@ -458,8 +443,8 @@ public class FenetrePrincipale extends JFrame {
             };
             panneauDialogue.setBackground(COULEUR_SURFACE);
 
-            // Titre de victoire sans emoji
-            JLabel lblVictoire = new JLabel("VICTOIRE !") {
+            // Titre de victoire avec emoji et style
+            JLabel lblVictoire = new JLabel("🎉 VICTOIRE ! 🎉") {
                 @Override
                 protected void paintComponent(Graphics g) {
                     Graphics2D g2d = (Graphics2D) g.create();
