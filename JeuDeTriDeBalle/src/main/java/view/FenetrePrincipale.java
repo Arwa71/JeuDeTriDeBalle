@@ -91,7 +91,7 @@ public class FenetrePrincipale extends JFrame {
         }
     }
 
-    private Image createPremiumIcon() {
+    private Image createPremiumIcon() { 
         int size = 48;
         BufferedImage icon = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = icon.createGraphics();
